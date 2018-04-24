@@ -22,6 +22,7 @@ namespace ChannelChange
         {
             InitializeComponent();
             browser = new WebDriver();
+            MakeIPsFolder();
             UpdateComboBox(); // Adds the txt files from the 'ips' to the combo box
         }
 
@@ -69,6 +70,15 @@ namespace ChannelChange
             foreach (string file in files)
             {
                 comboBoxIPAddress.Items.Add(Path.GetFileNameWithoutExtension(file));
+            }
+        }
+
+        private void MakeIPsFolder()
+        {
+            if (!Directory.Exists(Directory.GetCurrentDirectory().ToString() + @"\ips\"))
+            {
+                Directory.CreateDirectory(@"ips");
+                File.WriteAllText(Directory.GetCurrentDirectory().ToString() + @"\ips\Example.txt", "Enter all IP Addresses seperated by a newline" + Environment.NewLine + Environment.NewLine + "0.0.0.0" + Environment.NewLine + "1.1.1.1");
             }
         }
     }
