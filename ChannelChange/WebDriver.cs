@@ -10,6 +10,7 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using System.IO;
 using System.Threading;
+using System.Web;
 
 namespace ChannelChange
 {
@@ -97,7 +98,16 @@ namespace ChannelChange
         public void GoToWebsite(string username, string password, string ipAddress)
         {
             string website = String.Format("http://{0}:{1}@{2}/tools/channel_manager?tab=channel_settings", username, password, ipAddress);
-            Console.Write(website);
+
+            foreach (char letter in password)
+            {
+                if (!Char.IsLetterOrDigit(letter))
+                {
+                    string unicodeChar = Convert.ToByte(letter).ToString("x2");
+                    website = website.Replace(letter.ToString(), "%" + unicodeChar);
+                }
+            }
+            Console.WriteLine(website);
 
             driver.Navigate().GoToUrl(website);
 
@@ -133,6 +143,13 @@ namespace ChannelChange
             {
                 Console.Write("Could not find element");
             }
+        }
+
+        public void ApplyChange()
+        {
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
+            IWebElement applyButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@type='submit']")));
+            //applyButton.Click();
         }
     }
 }

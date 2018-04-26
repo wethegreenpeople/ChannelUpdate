@@ -40,6 +40,7 @@ namespace ChannelChange
                 IWebDriver driver = browser.Driver;
                 browser.GoToWebsite(username, password, ipAddress);
                 browser.ChangeChannelUrl(channel);
+                // browser.ApplyChange();
             }
             // Or if we're using a range supplied from a .txt file
             else if (!comboBoxIPAddress.Text.Contains('.') && comboBoxIPAddress.Items.Contains(comboBoxIPAddress.Text))
