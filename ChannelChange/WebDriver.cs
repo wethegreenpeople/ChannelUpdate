@@ -28,7 +28,7 @@ namespace ChannelChange
 
         public WebDriver()
         {
-
+            
         }
 
         // Launches the Firefox browser with the geckodriver.exe
@@ -150,6 +150,41 @@ namespace ChannelChange
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
             IWebElement applyButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@type='submit']")));
             //applyButton.Click();
+        }
+
+        // Checks the status of the changes after they've been applied
+        // Returns false if 5 successful status boxes have not been found on page
+        public bool CheckStatus()
+        {
+            bool status = false;
+
+            // There's an alert that pops up if a change could not be applied that I want to dismiss
+            try
+            {
+                var alert = driver.SwitchTo().Alert();
+                alert.Accept();
+            }
+            catch
+            {
+                Console.WriteLine("No alert to dismiss");
+            }
+
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            IWebElement statusChecks = wait.Until(ExpectedConditions.ElementExists(By.ClassName("success_local_message")));
+            var elements = driver.FindElements(By.ClassName("success_local_message"));
+
+            Console.WriteLine(elements.Count);
+
+            if (elements.Count != 5)
+            {
+                status = false;
+            }
+            else if (elements.Count == 5)
+            {
+                status = true;
+            }
+
+            return status;
         }
     }
 }
