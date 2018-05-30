@@ -10,4 +10,5 @@ If at any point the driver and/or Firefox need to be changed, both the geckodriv
 
 # Dependancies
 [geckodriver](https://github.com/mozilla/geckodriver/releases)
-Firefox
+
+[Firefox](https://www.mozilla.org/en-US/firefox/)
