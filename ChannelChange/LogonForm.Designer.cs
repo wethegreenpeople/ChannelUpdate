@@ -89,7 +89,7 @@
             this.Controls.Add(this.labelUsername);
             this.Controls.Add(this.textBoxUsername);
             this.Name = "LogonForm";
-            this.Text = "LogonForm";
+            this.Text = "AD Login";
             this.ResumeLayout(false);
             this.PerformLayout();
 

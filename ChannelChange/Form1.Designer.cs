@@ -38,7 +38,7 @@
             // 
             // buttonUpdate
             // 
-            this.buttonUpdate.Location = new System.Drawing.Point(60, 147);
+            this.buttonUpdate.Location = new System.Drawing.Point(62, 138);
             this.buttonUpdate.Name = "buttonUpdate";
             this.buttonUpdate.Size = new System.Drawing.Size(75, 23);
             this.buttonUpdate.TabIndex = 0;
@@ -94,7 +94,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(196, 182);
+            this.ClientSize = new System.Drawing.Size(196, 170);
             this.Controls.Add(this.checkBoxSetDefault);
             this.Controls.Add(this.comboBoxIPAddress);
             this.Controls.Add(this.labelChannel);
@@ -102,7 +102,7 @@
             this.Controls.Add(this.labelIPAddress);
             this.Controls.Add(this.buttonUpdate);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "IP Selection";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();

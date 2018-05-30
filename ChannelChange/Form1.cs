@@ -26,8 +26,6 @@ namespace ChannelChange
         {
             InitializeComponent();
             browser = new WebDriver();
-            MakeIPsFolder();
-            UpdateComboBox(); // Adds the txt files from the 'ips' to the combo box
         }
 
         public Form1(string username, string password, string networkIPDirectory) : this()
@@ -36,6 +34,7 @@ namespace ChannelChange
             this.networkIPDirectory = networkIPDirectory;
             this.username = username;
             this.password = password;
+            UpdateComboBox(); // Adds the txt files from the 'ips' to the combo box
         }
 
         private void buttonUpdate_Click(object sender, EventArgs e)
@@ -44,7 +43,7 @@ namespace ChannelChange
             string channel = textBoxChannel.Text;
             int ipsTried = 0;
             int ipsFailed = 0;
-            List<string> failedIps = new List<string>();
+            List<string> failedIps = new List<string>(); // running list of failed IPs
 
             // Checking to see if we're using a single IP Address 
             if (comboBoxIPAddress.Text.Contains('.'))
@@ -71,8 +70,12 @@ namespace ChannelChange
 
                 string selectedFile;
                 string[] ipRange;
+                // All the IPs are stored in .txt files on a server
                 string[] allLocations = Directory.GetFiles(networkIPDirectory);
 
+                // If our checkbox is checked
+                // that means we're setting all IPs
+                // to their default channel
                 if (checkBoxSetDefault.Checked)
                 {
                     selectedFile = networkIPDirectory + @"\Default.txt";
@@ -93,32 +96,51 @@ namespace ChannelChange
                         }
                         Console.WriteLine("IP Address: " + ipAddress + " Channel: " + channel);
                         browser.GoToWebsite(username, password, ipAddress);
+                        ++ipsTried;
                         browser.ChangeChannelUrl(channel);
                         browser.ApplyChange();
+                        if (!browser.CheckStatus())
+                        {
+                            ++ipsFailed;
+                            failedIps.Add(ipAddress);
+                        }
                     }
                 }
+                // If our checkbox is not checked
+                // we're setting the channel
+                // to whatever is provided in the textbox
                 else if (!checkBoxSetDefault.Checked)
                 {
                     selectedFile = networkIPDirectory + @"\" + comboBoxIPAddress.Text + ".txt";
                     ipRange = File.ReadAllLines(selectedFile); // every line in a provided .txt file
                     foreach (string ip in ipRange)
                     {
-                        Console.WriteLine("IP Address: " + ipAddress + " Channel: " + channel);
+                        Console.WriteLine("IP Address: " + ip + " Channel: " + channel);
                         browser.GoToWebsite(username, password, ip);
+                        ++ipsTried;
                         browser.ChangeChannelUrl(channel);
                         browser.ApplyChange();
+                        if (!browser.CheckStatus())
+                        {
+                            ++ipsFailed;
+                            failedIps.Add(ip);
+                        }
                     }
                 }
-
                 browser.QuitBrowser();
+                InformFailedIps(ipsTried, ipsFailed, failedIps);
             }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // Sometimes getting the driver closed takes a few seconds
+            // so we're just immediately hiding the form while the program closes whatever it needs to
+            this.Hide();
             browser.QuitBrowser();
 
-            string directory = @"use \\dr-main\departments\BlackBox\ips /delete";
+            // Removing our manually mapped blackbox drive
+            string directory = @"use " + networkIPDirectory + " /delete";
             Process cmd = new Process();
             cmd.StartInfo.CreateNoWindow = true;
             cmd.StartInfo.FileName = "net.exe";
@@ -130,16 +152,17 @@ namespace ChannelChange
             Application.Exit();
         }
 
+        // Updating our combobox with all the IP .txt files in our blackbox server
         private void UpdateComboBox()
         {
-            string ipFileLocation = @"\\dr-main\departments\BlackBox\ips";
-            string[] files = Directory.GetFiles(ipFileLocation);
+            string[] files = Directory.GetFiles(networkIPDirectory);
             foreach (string file in files)
             {
                 comboBoxIPAddress.Items.Add(Path.GetFileNameWithoutExtension(file));
             }
         }
 
+        // Defunct now that IPs are stored on the server
         private void MakeIPsFolder()
         {
             if (!Directory.Exists(Directory.GetCurrentDirectory().ToString() + @"\ips\"))

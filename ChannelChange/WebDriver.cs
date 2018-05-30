@@ -39,6 +39,7 @@ namespace ChannelChange
             FirefoxDriverService service = FirefoxDriverService.CreateDefaultService(Directory.GetCurrentDirectory());
             service.HideCommandPromptWindow = true; // This CMD window is launched by the driver and gives debugging / status info about current driver
             FirefoxOptions options = new FirefoxOptions();
+            service.FirefoxBinaryPath = "Firefox/firefox.exe";
 
             try
             {
@@ -99,6 +100,9 @@ namespace ChannelChange
         {
             string website = String.Format("http://{0}:{1}@{2}/tools/channel_manager?tab=channel_settings", username, password, ipAddress);
 
+            // Ensuring that special characters are being handled in our passwords
+            // There are some special characters that the URL can't handle
+            // such as '#'
             foreach (char letter in password)
             {
                 if (!Char.IsLetterOrDigit(letter))
@@ -118,7 +122,7 @@ namespace ChannelChange
                 var alert = driver.SwitchTo().Alert();
                 alert.Accept();
                 // Giving a 2 second wait here because otherwise we try and fill in our form
-                // to quickly after dismissing the popup
+                // too quickly after dismissing the popup
                 Thread.Sleep(2000);
             }
             catch
@@ -134,22 +138,30 @@ namespace ChannelChange
             try
             {
                 Console.WriteLine("\nFinding Element on page " + driver.Url);
-                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
                 IWebElement channelSubscriptionURL = wait.Until(ExpectedConditions.ElementToBeClickable(By.Name("href")));
                 channelSubscriptionURL.Clear();
                 channelSubscriptionURL.SendKeys(@"https://blackbox.tmcc.edu/channel/" + channel);
             }
             catch
             {
-                Console.Write("Could not find element");
+                Console.Write("Could not find channel URL element");
             }
         }
 
+        // Hitting the apply button on the webpage
         public void ApplyChange()
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
-            IWebElement applyButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@type='submit']")));
-            //applyButton.Click();
+            try
+            {
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+                IWebElement applyButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//input[@type='submit']")));
+                applyButton.Click();
+            }
+            catch
+            {
+                Console.WriteLine("Could not find apply button");
+            }
         }
 
         // Checks the status of the changes after they've been applied
@@ -169,19 +181,26 @@ namespace ChannelChange
                 Console.WriteLine("No alert to dismiss");
             }
 
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            IWebElement statusChecks = wait.Until(ExpectedConditions.ElementExists(By.ClassName("success_local_message")));
-            var elements = driver.FindElements(By.ClassName("success_local_message"));
-
-            Console.WriteLine(elements.Count);
-
-            if (elements.Count != 5)
+            try
             {
-                status = false;
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                IWebElement statusChecks = wait.Until(ExpectedConditions.ElementExists(By.ClassName("success_local_message")));
+                var elements = driver.FindElements(By.ClassName("success_local_message"));
+
+                Console.WriteLine(elements.Count);
+
+                if (elements.Count != 5)
+                {
+                    status = false;
+                }
+                else if (elements.Count == 5)
+                {
+                    status = true;
+                }
             }
-            else if (elements.Count == 5)
+            catch
             {
-                status = true;
+                Console.WriteLine("Could not find success messages");
             }
 
             return status;
